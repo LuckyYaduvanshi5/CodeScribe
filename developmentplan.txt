@@ -1,0 +1,261 @@
+Full CodeScribe Development Plan
+Overview
+Creating a comprehensive development plan for your AI-Driven Code Documentation Generator (CodeScribe) with Supabase integration for authentication and storage.
+
+Let's first check the current state of your repository to make informed recommendations.
+
+CodeScribe: Full Detailed Development Plan
+Project Overview
+CodeScribe is an AI-powered documentation generator web application that automatically creates comprehensive documentation for code. This plan outlines the complete development workflow, tech stack, database schema, and implementation timeline with Supabase for authentication and storage.
+
+Tech Stack
+Frontend
+Framework: Next.js 14 (App Router)
+UI Library: React
+Styling: Tailwind CSS with shadcn/ui components
+State Management: React Query + Zustand
+Code Editor: Monaco Editor (VS Code's editor)
+Authentication: Supabase Auth
+Backend
+API Framework: Next.js API Routes
+Database: Supabase (PostgreSQL)
+Storage: Supabase Storage
+Authentication: Supabase Auth
+ORM: Prisma
+AI Integration: Google gemini API key (AIzaSyA_6HVoLel-jHWaY6vvjkigQpfiMuru-wo)
+DevOps
+Version Control: GitHub
+Deployment: Vercel
+Analytics: Vercel Analytics
+Monitoring: Sentry
+Database Schema
+SQL
+-- USERS TABLE
+CREATE TABLE users (
+  id UUID PRIMARY KEY REFERENCES auth.users(id),
+  email VARCHAR NOT NULL UNIQUE,
+  full_name VARCHAR,
+  avatar_url VARCHAR,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+  usage_credits INTEGER DEFAULT 10,
+  subscription_tier VARCHAR DEFAULT 'free'
+);
+
+-- PROJECTS TABLE
+CREATE TABLE projects (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  name VARCHAR NOT NULL,
+  description TEXT,
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+  is_public BOOLEAN DEFAULT false
+);
+
+-- CODE_FILES TABLE
+CREATE TABLE code_files (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  project_id UUID NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+  file_name VARCHAR NOT NULL,
+  file_path VARCHAR,
+  language VARCHAR NOT NULL,
+  content TEXT NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- DOCUMENTATION TABLE
+CREATE TABLE documentation (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  code_file_id UUID NOT NULL REFERENCES code_files(id) ON DELETE CASCADE,
+  content TEXT NOT NULL,
+  format VARCHAR NOT NULL DEFAULT 'markdown',
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+  ai_model VARCHAR NOT NULL,
+  prompt_template_id UUID REFERENCES prompt_templates(id)
+);
+
+-- PROMPT_TEMPLATES TABLE
+CREATE TABLE prompt_templates (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  name VARCHAR NOT NULL,
+  description TEXT,
+  content TEXT NOT NULL,
+  user_id UUID REFERENCES users(id) ON DELETE SET NULL,
+  is_system BOOLEAN DEFAULT false,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- API_USAGE_LOGS TABLE
+CREATE TABLE api_usage_logs (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  endpoint VARCHAR NOT NULL,
+  tokens_used INTEGER NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+  request_success BOOLEAN NOT NULL,
+  model VARCHAR NOT NULL
+);
+
+-- SUBSCRIPTIONS TABLE
+CREATE TABLE subscriptions (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID NOT NULL UNIQUE REFERENCES users(id) ON DELETE CASCADE,
+  stripe_customer_id VARCHAR,
+  stripe_subscription_id VARCHAR,
+  tier VARCHAR NOT NULL,
+  status VARCHAR NOT NULL,
+  current_period_start TIMESTAMP WITH TIME ZONE,
+  current_period_end TIMESTAMP WITH TIME ZONE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- TEAM_MEMBERS TABLE (For future team features)
+CREATE TABLE team_members (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  team_id UUID NOT NULL,
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  role VARCHAR NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (team_id, user_id)
+);
+Supabase Setup and Integration
+Create Project in Supabase
+
+Set up new project
+Configure database tables as per schema
+Set up authentication providers (Email, Google, GitHub)
+Authentication Setup
+
+Implement Supabase Auth UI components
+Configure auth middleware in Next.js
+Set up protected routes
+Database Integration
+
+Set up Prisma with Supabase
+Create database models and migrations
+Configure environment variables
+Storage Configuration
+
+Create buckets for documentation exports
+Set up storage policies
+Implement file upload/download functionality
+Development Workflow
+Phase 1: Foundation (2 weeks)
+Week 1: Project Setup and Authentication
+Day 1-2: Initialize Next.js project and configure Tailwind CSS
+Day 3-4: Set up Supabase project and implement authentication
+Day 5-7: Create database schema and configure Prisma
+Week 2: Core UI and Basic Functionality
+Day 1-2: Build core UI components including layout, navigation
+Day 3-4: Implement Monaco Editor integration
+Day 5-7: Create basic documentation generation with OpenAI
+Phase 2: Core Features (3 weeks)
+Week 3: Project Management
+Day 1-3: Implement project creation and management
+Day 4-7: Build file management system with Supabase Storage
+Week 4: AI Documentation Generation
+Day 1-3: Enhance AI prompting system with custom templates
+Day 4-5: Create documentation preview and editing
+Day 6-7: Implement documentation export functionality (MD, PDF, HTML)
+Week 5: User Dashboard and Settings
+Day 1-3: Build user dashboard with project overview
+Day 4-5: Implement user settings and preferences
+Day 6-7: Create usage tracking and analytics
+Phase 3: Advanced Features and Polishing (3 weeks)
+Week 6: Advanced AI Features
+Day 1-3: Implement multi-language support optimization
+Day 4-7: Build context-aware documentation with dependency analysis
+Week 7: Integrations
+Day 1-3: Implement GitHub repository connection
+Day 4-7: Create API for external integrations
+Week 8: Testing and Refinement
+Day 1-3: Conduct comprehensive testing
+Day 4-5: Performance optimization
+Day 6-7: UI/UX refinements
+Phase 4: Launch Preparation (2 weeks)
+Week 9: Monetization Implementation
+Day 1-3: Set up subscription tiers and payments with Stripe
+Day 4-7: Implement usage limits and premium features
+Week 10: Final Testing and Launch
+Day 1-3: Final testing and bug fixes
+Day 4-5: Documentation and help center content
+Day 6-7: Production deployment and launch
+Project Structure
+Code
+codescribe/
+├── public/
+│   ├── logo.svg
+│   └── images/
+├── src/
+│   ├── app/
+│   │   ├── (auth)/
+│   │   │   ├── login/
+│   │   │   ├── register/
+│   │   │   └── reset-password/
+│   │   ├── (dashboard)/
+│   │   │   ├── dashboard/
+│   │   │   ├── projects/
+│   │   │   └── settings/
+│   │   ├── api/
+│   │   │   ├── auth/
+│   │   │   ├── documentation/
+│   │   │   ├── projects/
+│   │   │   └── webhooks/
+│   │   ├── layout.tsx
+│   │   └── page.tsx
+│   ├── components/
+│   │   ├── auth/
+│   │   ├── code-editor/
+│   │   ├── documentation/
+│   │   ├── layout/
+│   │   ├── projects/
+│   │   └── ui/
+│   ├── lib/
+│   │   ├── ai/
+│   │   ├── db/
+│   │   ├── supabase/
+│   │   └── utils/
+│   ├── prisma/
+│   │   └── schema.prisma
+│   ├── store/
+│   │   ├── editor-store.ts
+│   │   └── user-store.ts
+│   └── styles/
+│       └── globals.css
+├── .env.local
+├── next.config.js
+├── package.json
+├── postcss.config.js
+├── tailwind.config.js
+└── tsconfig.json
+Key Features Implementation
+1. AI Documentation Generation
+
+src/lib/ai/generate-documentation.ts
+import { OpenAI } from 'openai';
+import { getPromptTemplate } from './prompt-templates';
+import { incrementApiUsage } from '../db/usage';
+
+const openai = new OpenAI({
+2. Supabase Authentication
+
+src/lib/supabase/auth.ts
+import { createClient } from '@supabase/supabase-js';
+import { Database } from './database.types';
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+3. Project & File Management
+
+src/lib/db/projects.ts
+import { prisma } from './prisma';
+import { supabase } from '../supabase/client';
+
+export async function createProject({
+  name,

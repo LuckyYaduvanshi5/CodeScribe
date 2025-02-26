@@ -1,0 +1,25 @@
+code-scribe/
+├── frontend/
+│   ├── components/
+│   │   ├── CodeEditor.tsx
+│   │   ├── DocumentationOutput.tsx
+│   │   └── Navbar.tsx
+│   ├── pages/
+│   │   ├── index.tsx
+│   │   ├── dashboard.tsx
+│   │   └── api/
+│   │       └── generate-docs.ts
+│   ├── styles/
+│   │   └── globals.css
+│   └── utils/
+│       └── aiHelper.ts
+├── backend/
+│   ├── controllers/
+│   │   └── documentationController.js
+│   ├── models/
+│   │   └── User.js
+│   ├── routes/
+│   │   └── api.js
+│   └── server.js
+└── shared/
+    └── types.ts
